@@ -2,4 +2,9 @@
     <string name="app_name">BakingApp</string>
     <string name="action_settings">Settings</string>
     <string name="recipe_image">Recipe image</string>
+    <string name="title_activity_recipe_detail">Recipe Detail</string>
+    <string name="ingredients">Ingredients</string>
+    <string name="cooking_steps">Cooking steps</string>
+    <string name="step_image">step image</string>
+    <string name="there_is_video_for_this_step">there is video for this step</string>
 </resources>

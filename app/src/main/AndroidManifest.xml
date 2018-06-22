@@ -3,7 +3,8 @@
     package="ru.develop_for_android.bakingapp">
 
     <uses-permission android:name="android.permission.INTERNET" />
-    
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -21,8 +22,20 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <service android:name=".networking.RecipesLoader"
+
+        <service
+            android:name=".networking.RecipesLoader"
             android:permission="android.permission.BIND_JOB_SERVICE" />
+
+        <activity
+            android:name=".RecipeDetailActivity"
+            android:label="@string/title_activity_recipe_detail"
+            android:parentActivityName=".MainActivity"
+            android:theme="@style/AppTheme.NoActionBar">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="ru.develop_for_android.bakingapp.MainActivity" />
+        </activity>
     </application>
 
 </manifest>

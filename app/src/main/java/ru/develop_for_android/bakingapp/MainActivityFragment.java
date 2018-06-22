@@ -2,6 +2,7 @@ package ru.develop_for_android.bakingapp;
 
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
+import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -10,7 +11,6 @@ import android.support.v4.app.Fragment;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -27,7 +27,6 @@ import static android.support.v7.widget.DividerItemDecoration.VERTICAL;
  */
 public class MainActivityFragment extends Fragment {
 
-    private RecyclerView recyclerView;
     private RecipeAdapter adapter;
 
     public MainActivityFragment() {
@@ -37,7 +36,7 @@ public class MainActivityFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View fragmentView = inflater.inflate(R.layout.fragment_main, container, false);
-        recyclerView = fragmentView.findViewById(R.id.recycler_view);
+        RecyclerView recyclerView = fragmentView.findViewById(R.id.recycler_view);
         int spanCount;
         if (getResources().getConfiguration().orientation == ORIENTATION_LANDSCAPE) {
             if ((getResources().getConfiguration().screenLayout &
@@ -51,9 +50,16 @@ public class MainActivityFragment extends Fragment {
             spanCount = 1;
         }
         recyclerView.setLayoutManager(new GridLayoutManager(getContext(), spanCount));
-        adapter = new RecipeAdapter(getContext());
+        adapter = new RecipeAdapter(getContext(), new ItemClickListener() {
+            @Override
+            public void onItemClick(int itemId, String title) {
+                Intent openDetails = new Intent(requireContext(), RecipeDetailActivity.class);
+                openDetails.putExtra(RecipeDetailFragment.RECIPE_ID_KEY, itemId);
+                openDetails.putExtra(RecipeDetailActivity.RECIPE_TITLE_KEY, title);
+                startActivity(openDetails);
+            }
+        });
         recyclerView.setAdapter(adapter);
-        Log.i("MainActivityFragment", "fragment ready");
 
         DividerItemDecoration decoration = new DividerItemDecoration(requireContext(), VERTICAL);
         recyclerView.addItemDecoration(decoration);

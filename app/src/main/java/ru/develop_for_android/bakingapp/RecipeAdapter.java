@@ -22,6 +22,7 @@ public class RecipeAdapter extends RecyclerView.Adapter<RecipeAdapter.ViewHolder
 
     private List<RecipeEntry> recipes;
     private Context context;
+    private ItemClickListener listener;
     private String[] localImages = new String[] {
             "bake1.jpg",
             "bake2.jpg",
@@ -31,8 +32,9 @@ public class RecipeAdapter extends RecyclerView.Adapter<RecipeAdapter.ViewHolder
     };
     private Random randomManager;
 
-    RecipeAdapter(Context context) {
+    RecipeAdapter(Context context, ItemClickListener listener) {
         this.context = context;
+        this.listener = listener;
         randomManager = new Random();
     }
 
@@ -84,6 +86,13 @@ public class RecipeAdapter extends RecyclerView.Adapter<RecipeAdapter.ViewHolder
         ViewHolder(View itemView) {
             super(itemView);
             view = itemView;
+            view.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    listener.onItemClick(recipes.get(getAdapterPosition()).getId(),
+                            recipeTitle.getText().toString());
+                }
+            });
             recipeImage = view.findViewById(R.id.recipe_image);
             recipeTitle = view.findViewById(R.id.recipe_title);
         }

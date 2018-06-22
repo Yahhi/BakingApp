@@ -41,6 +41,10 @@ public class IngredientEntry {
         return quantity;
     }
 
+    public String formMeasureString() {
+        return String.valueOf(quantity) + " " + measure;
+    }
+
     public int getRecipeId() {
         return recipeId;
     }
