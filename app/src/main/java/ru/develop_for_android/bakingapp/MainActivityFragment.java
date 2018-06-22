@@ -2,6 +2,7 @@ package ru.develop_for_android.bakingapp;
 
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -18,6 +19,7 @@ import java.util.List;
 
 import ru.develop_for_android.bakingapp.database.RecipeEntry;
 
+import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 import static android.support.v7.widget.DividerItemDecoration.VERTICAL;
 
 /**
@@ -36,7 +38,19 @@ public class MainActivityFragment extends Fragment {
                              Bundle savedInstanceState) {
         View fragmentView = inflater.inflate(R.layout.fragment_main, container, false);
         recyclerView = fragmentView.findViewById(R.id.recycler_view);
-        recyclerView.setLayoutManager(new GridLayoutManager(getContext(), 1));
+        int spanCount;
+        if (getResources().getConfiguration().orientation == ORIENTATION_LANDSCAPE) {
+            if ((getResources().getConfiguration().screenLayout &
+                    Configuration.SCREENLAYOUT_SIZE_MASK) >
+                    Configuration.SCREENLAYOUT_SIZE_NORMAL) {
+                spanCount = 3;
+            } else {
+                spanCount = 2;
+            }
+        } else {
+            spanCount = 1;
+        }
+        recyclerView.setLayoutManager(new GridLayoutManager(getContext(), spanCount));
         adapter = new RecipeAdapter(getContext());
         recyclerView.setAdapter(adapter);
         Log.i("MainActivityFragment", "fragment ready");
