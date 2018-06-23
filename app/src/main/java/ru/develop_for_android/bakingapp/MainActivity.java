@@ -22,9 +22,9 @@ public class MainActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
 
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
-        //if (preferences.getBoolean(RecipesLoader.KEY_DOWNLOAD_COMPLETE, false)) {
+        if (preferences.getBoolean(RecipesLoader.KEY_DOWNLOAD_COMPLETE, false)) {
             JobIntentService.enqueueWork(getBaseContext(), RecipesLoader.class, 1234, new Intent());
-        //}
+        }
     }
 
     @Override
