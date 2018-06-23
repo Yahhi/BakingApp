@@ -28,7 +28,6 @@ import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter;
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
 import com.google.android.exoplayer2.util.Util;
 
-import ru.develop_for_android.bakingapp.database.AppDatabase;
 import ru.develop_for_android.bakingapp.database.CookingStepEntry;
 
 /**
@@ -36,36 +35,16 @@ import ru.develop_for_android.bakingapp.database.CookingStepEntry;
  */
 public class CookingStepDetailsFragment extends Fragment {
 
-    private int stepId;
     TextView stepDescriptionView;
     PlayerView exoPlayer;
     ImageView stepImage;
 
-    public static CookingStepDetailsFragment newInstance(int stepId) {
-        Bundle args = new Bundle();
-        args.putInt(CookingStepDetailsActivity.STEP_ID_KEY, stepId);
-        CookingStepDetailsFragment fragment = new CookingStepDetailsFragment();
-        fragment.setArguments(args);
-        return fragment;
-    }
-
     public CookingStepDetailsFragment() {
     }
 
-    @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        Bundle args = getArguments();
-        if (args != null) {
-            stepId = args.getInt(CookingStepDetailsActivity.STEP_ID_KEY);
-        }
-    }
-
     private void setupViewModel() {
-        StepDetailsViewModelFactory factory = new StepDetailsViewModelFactory(
-                AppDatabase.getInstance(requireContext()), stepId);
-        StepDetailsViewModel viewModel = ViewModelProviders.of(this, factory)
-                .get(StepDetailsViewModel.class);
+        RecipeDetailsViewModel viewModel = ViewModelProviders.of(requireActivity())
+                .get(RecipeDetailsViewModel.class);
         viewModel.getStepEntry().observe(this, new Observer<CookingStepEntry>() {
             @Override
             public void onChanged(@Nullable CookingStepEntry stepEntry) {

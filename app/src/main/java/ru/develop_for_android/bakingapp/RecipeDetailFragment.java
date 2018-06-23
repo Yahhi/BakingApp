@@ -25,7 +25,7 @@ import static android.support.v7.widget.DividerItemDecoration.VERTICAL;
  */
 public class RecipeDetailFragment extends Fragment {
 
-    private StepAdapter stepAdapter;
+    private CookingStepAdapter cookingStepAdapter;
     private IngredientsAdapter ingredientsAdapter;
 
     public static final String RECIPE_ID_KEY = "recipe_id";
@@ -47,8 +47,8 @@ public class RecipeDetailFragment extends Fragment {
         } else {
             throw new RuntimeException("parent activity must support CookingStepClickListener");
         }
-        stepAdapter = new StepAdapter(requireContext(), listener);
-        stepsList.setAdapter(stepAdapter);
+        cookingStepAdapter = new CookingStepAdapter(requireContext(), listener);
+        stepsList.setAdapter(cookingStepAdapter);
         DividerItemDecoration decoration = new DividerItemDecoration(requireContext(), VERTICAL);
         stepsList.addItemDecoration(decoration);
         stepsList.setNestedScrollingEnabled(false);
@@ -69,7 +69,7 @@ public class RecipeDetailFragment extends Fragment {
         viewModel.getSteps().observe(this, new Observer<List<CookingStepEntry>>() {
             @Override
             public void onChanged(@Nullable List<CookingStepEntry> stepEntries) {
-                stepAdapter.setSteps(stepEntries);
+                cookingStepAdapter.setSteps(stepEntries);
             }
         });
         viewModel.getIngredients().observe(this, new Observer<List<IngredientEntry>>() {

@@ -1,0 +1,28 @@
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    app:layout_behavior="@string/appbar_scrolling_view_behavior"
+    android:layout_height="match_parent"
+    android:layout_width="match_parent">
+        <fragment
+            android:id="@+id/fragment_place"
+            android:name="ru.develop_for_android.bakingapp.RecipeDetailFragment"
+            android:layout_height="match_parent"
+            android:layout_width="0dp"
+            android:layout_weight="2"
+            tools:layout="@layout/fragment_recipe_detail" />
+        <View
+            android:id="@+id/large_screen_divider"
+            android:layout_width="2dp"
+            android:layout_height="match_parent"
+            android:background="@color/colorPrimary"
+                />
+        <fragment
+            android:id="@+id/fragment_step_details"
+            android:name="ru.develop_for_android.bakingapp.CookingStepDetailsFragment"
+            android:layout_width="0dp"
+            android:layout_weight="3"
+            android:layout_height="match_parent"
+            tools:layout="@layout/fragment_cooking_step_details" />
+</LinearLayout>

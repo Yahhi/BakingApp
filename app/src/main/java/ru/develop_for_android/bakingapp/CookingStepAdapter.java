@@ -15,13 +15,13 @@ import java.util.List;
 
 import ru.develop_for_android.bakingapp.database.CookingStepEntry;
 
-public class StepAdapter extends RecyclerView.Adapter<StepAdapter.ViewHolder> {
+public class CookingStepAdapter extends RecyclerView.Adapter<CookingStepAdapter.ViewHolder> {
 
     private Context context;
     private List<CookingStepEntry> steps;
     private CookingStepClickListener listener;
 
-    StepAdapter(Context context, CookingStepClickListener listener) {
+    CookingStepAdapter(Context context, CookingStepClickListener listener) {
         this.context = context;
         this.listener = listener;
     }
@@ -83,7 +83,7 @@ public class StepAdapter extends RecyclerView.Adapter<StepAdapter.ViewHolder> {
                 @Override
                 public void onClick(View v) {
                     CookingStepEntry step = steps.get(getAdapterPosition());
-                    listener.onItemClick(step.getId());
+                    listener.onItemClick(step);
                 }
             });
             stepImage = view.findViewById(R.id.step_image);

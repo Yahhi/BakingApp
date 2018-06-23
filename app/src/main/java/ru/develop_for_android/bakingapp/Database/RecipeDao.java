@@ -26,7 +26,10 @@ public interface RecipeDao {
     LiveData<List<CookingStepEntry>> loadStepsForRecipe(int recipeId);
 
     @Query("SELECT * FROM step WHERE id = :id")
-    LiveData<CookingStepEntry> loadStepById(int id);
+    CookingStepEntry loadStepById(int id);
+
+    @Query("SELECT * FROM step WHERE recipe_id = :recipeId ORDER BY order_id ASC LIMIT 1")
+    CookingStepEntry loadFirstStep(int recipeId);
 
     @Insert
     void insertStep(CookingStepEntry step);

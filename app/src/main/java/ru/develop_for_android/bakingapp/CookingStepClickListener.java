@@ -1,5 +1,7 @@
 package ru.develop_for_android.bakingapp;
 
+import ru.develop_for_android.bakingapp.database.CookingStepEntry;
+
 public interface CookingStepClickListener {
-    void onItemClick(int stepId);
+    void onItemClick(CookingStepEntry step);
 }

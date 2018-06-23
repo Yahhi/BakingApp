@@ -29,8 +29,8 @@
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|center_horizontal"
         app:itemBackground="@color/colorPrimaryLight"
-        app:itemIconTint="@color/colorPrimaryDark"
-        app:itemTextColor="@color/colorPrimaryDark"
+        app:itemIconTint="@color/colorSecondaryDark"
+        app:itemTextColor="@color/colorSecondaryDark"
         app:menu="@menu/menu_steps_navigation" />
 
 </android.support.design.widget.CoordinatorLayout>

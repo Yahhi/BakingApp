@@ -1,6 +1,7 @@
 package ru.develop_for_android.bakingapp;
 
 import android.arch.lifecycle.LiveData;
+import android.arch.lifecycle.MutableLiveData;
 import android.arch.lifecycle.ViewModel;
 import android.support.annotation.NonNull;
 import android.util.Log;
@@ -16,8 +17,7 @@ public class RecipeDetailsViewModel extends ViewModel {
     private LiveData<List<CookingStepEntry>> steps;
     private LiveData<List<IngredientEntry>> ingredients;
 
-    private LiveData<CookingStepEntry> stepEntry;
-
+    private MutableLiveData<CookingStepEntry> stepEntry;
 
     private AppDatabase database;
 
@@ -27,6 +27,7 @@ public class RecipeDetailsViewModel extends ViewModel {
 
         steps = database.recipeDao().loadStepsForRecipe(recipeId);
         ingredients = database.recipeDao().loadIngredientsForRecipe(recipeId);
+        stepEntry = new MutableLiveData<>();
     }
 
     public LiveData<List<CookingStepEntry>> getSteps() {
@@ -37,8 +38,8 @@ public class RecipeDetailsViewModel extends ViewModel {
         return ingredients;
     }
 
-    public void selectStep(int stepId) {
-        stepEntry = database.recipeDao().loadStepById(stepId);
+    public void selectStep(CookingStepEntry stepEntry) {
+        this.stepEntry.postValue(stepEntry);
     }
     public LiveData<CookingStepEntry> getStepEntry() {
         return stepEntry;

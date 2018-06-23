@@ -6,8 +6,10 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.View;
 
 import ru.develop_for_android.bakingapp.database.AppDatabase;
+import ru.develop_for_android.bakingapp.database.CookingStepEntry;
 
 import static ru.develop_for_android.bakingapp.RecipeDetailFragment.RECIPE_TITLE_KEY;
 
@@ -15,6 +17,8 @@ public class RecipeDetailActivity extends AppCompatActivity implements CookingSt
 
     private int recipeId;
     private String recipeTitle;
+    View largeScreenDivider;
+    RecipeDetailsViewModel viewModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,7 +38,7 @@ public class RecipeDetailActivity extends AppCompatActivity implements CookingSt
         if (recipeTitle != null) {
             RecipeDetailsViewModelFactory factory = new RecipeDetailsViewModelFactory(
                     AppDatabase.getInstance(getApplicationContext().getApplicationContext()), recipeId);
-            RecipeDetailsViewModel viewModel = ViewModelProviders.of(this, factory)
+            viewModel = ViewModelProviders.of(this, factory)
                     .get(RecipeDetailsViewModel.class);
 
         }
@@ -44,6 +48,7 @@ public class RecipeDetailActivity extends AppCompatActivity implements CookingSt
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         setTitle(recipeTitle);
+        largeScreenDivider = findViewById(R.id.large_screen_divider);
     }
 
     @Override
@@ -54,11 +59,15 @@ public class RecipeDetailActivity extends AppCompatActivity implements CookingSt
     }
 
     @Override
-    public void onItemClick(int stepId) {
-        Intent openStepDetails = new Intent(getBaseContext(), CookingStepDetailsActivity.class);
-        openStepDetails.putExtra(CookingStepDetailsActivity.STEP_ID_KEY, stepId);
-        openStepDetails.putExtra(CookingStepDetailsActivity.RECIPE_ID_KEY, recipeId);
-        openStepDetails.putExtra(CookingStepDetailsActivity.RECIPE_TITLE_KEY, recipeTitle);
-        startActivity(openStepDetails);
+    public void onItemClick(CookingStepEntry step) {
+        if (largeScreenDivider == null) {
+            Intent openStepDetails = new Intent(getBaseContext(), CookingStepDetailsActivity.class);
+            openStepDetails.putExtra(CookingStepDetailsActivity.STEP_ID_KEY, step.getId());
+            openStepDetails.putExtra(CookingStepDetailsActivity.RECIPE_ID_KEY, step.getRecipeId());
+            openStepDetails.putExtra(CookingStepDetailsActivity.RECIPE_TITLE_KEY, recipeTitle);
+            startActivity(openStepDetails);
+        } else {
+            viewModel.selectStep(step);
+        }
     }
 }
