@@ -3,6 +3,7 @@ package ru.develop_for_android.bakingapp;
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -10,13 +11,17 @@ import android.support.design.widget.BottomNavigationView;
 import android.support.v4.app.NavUtils;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 
 import java.util.List;
 
 import ru.develop_for_android.bakingapp.database.AppDatabase;
 import ru.develop_for_android.bakingapp.database.CookingStepEntry;
+
+import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 
 public class CookingStepDetailsActivity extends AppCompatActivity {
 
@@ -29,6 +34,7 @@ public class CookingStepDetailsActivity extends AppCompatActivity {
     int[] stepIds;
     List<CookingStepEntry> steps;
     MenuItem back, forward, active;
+    BottomNavigationView bottomNavigationView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -94,7 +100,7 @@ public class CookingStepDetailsActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        BottomNavigationView bottomNavigationView = findViewById(R.id.steps_navigation);
+        bottomNavigationView = findViewById(R.id.steps_navigation);
         Menu bottomMenu = bottomNavigationView.getMenu();
         active = bottomMenu.findItem(R.id.step_active);
         back = bottomMenu.findItem(R.id.step_back);
@@ -142,5 +148,36 @@ public class CookingStepDetailsActivity extends AppCompatActivity {
             return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        Log.i("LAND", "configuration changed");
+        CookingStepDetailsFragment fragment =
+                (CookingStepDetailsFragment) getSupportFragmentManager()
+                        .findFragmentById(R.id.fragment_step_details);
+        if (newConfig.orientation == ORIENTATION_LANDSCAPE) {
+            Log.i("LAND", "landscape found");
+            getWindow().getDecorView().setSystemUiVisibility(
+                    View.SYSTEM_UI_FLAG_IMMERSIVE
+                    // Set the content to appear under the system bars so that the
+                    // content doesn't resize when the system bars hide and show.
+                    | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                    | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                    // Hide the nav bar and status bar
+                    | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                    | View.SYSTEM_UI_FLAG_FULLSCREEN);
+            getSupportActionBar().hide();
+            bottomNavigationView.setVisibility(View.GONE);
+            fragment.showVideoOnFullScreen();
+        } else {
+            getWindow().getDecorView().setSystemUiVisibility(
+                    View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION |
+                            View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
+            getSupportActionBar().show();
+            bottomNavigationView.setVisibility(View.VISIBLE);
+            fragment.exitVideoFullScreen();
+        }
     }
 }

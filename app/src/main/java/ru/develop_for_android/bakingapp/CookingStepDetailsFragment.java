@@ -11,6 +11,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
@@ -30,6 +31,8 @@ import com.google.android.exoplayer2.util.Util;
 
 import ru.develop_for_android.bakingapp.database.CookingStepEntry;
 
+import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
+
 /**
  * A placeholder fragment containing a simple view.
  */
@@ -38,6 +41,8 @@ public class CookingStepDetailsFragment extends Fragment {
     TextView stepDescriptionView;
     PlayerView exoPlayer;
     ImageView stepImage;
+
+    LinearLayout.LayoutParams portraitParams;
 
     public CookingStepDetailsFragment() {
     }
@@ -53,6 +58,7 @@ public class CookingStepDetailsFragment extends Fragment {
                 }
                 String description = stepEntry.getDescription();
                 stepDescriptionView.setText(description);
+
                 String imageAddress = stepEntry.getThumbnailUrl();
                 if (imageAddress == null || imageAddress.equals("")) {
                     stepImage.setVisibility(View.GONE);
@@ -61,27 +67,48 @@ public class CookingStepDetailsFragment extends Fragment {
                     Glide.with(stepImage).load(imageAddress).into(stepImage);
                 }
 
-                //BandwidthMeter bandwidthMeter = new DefaultBandwidthMeter();
-                DefaultBandwidthMeter bandwidthMeter = new DefaultBandwidthMeter();
-                TrackSelection.Factory videoTrackSelectionFactory =
-                        new AdaptiveTrackSelection.Factory(bandwidthMeter);
-                TrackSelector trackSelector =
-                        new DefaultTrackSelector(videoTrackSelectionFactory);
+                String videoAddress = stepEntry.getVideoUrl();
+                if (videoAddress == null || videoAddress.equals("")) {
+                    exoPlayer.setVisibility(View.GONE);
+                } else {
+                    exoPlayer.setVisibility(View.VISIBLE);
+                    //BandwidthMeter bandwidthMeter = new DefaultBandwidthMeter();
+                    DefaultBandwidthMeter bandwidthMeter = new DefaultBandwidthMeter();
+                    TrackSelection.Factory videoTrackSelectionFactory =
+                            new AdaptiveTrackSelection.Factory(bandwidthMeter);
+                    TrackSelector trackSelector =
+                            new DefaultTrackSelector(videoTrackSelectionFactory);
 
-                SimpleExoPlayer player =
-                        ExoPlayerFactory.newSimpleInstance(getContext(), trackSelector);
+                    SimpleExoPlayer player =
+                            ExoPlayerFactory.newSimpleInstance(getContext(), trackSelector);
 
-                DataSource.Factory dataSourceFactory = new DefaultDataSourceFactory(requireContext(),
-                        Util.getUserAgent(requireContext(), "BakingApp"), bandwidthMeter);
-                // This is the MediaSource representing the media to be played.
-                MediaSource videoSource = new ExtractorMediaSource.Factory(dataSourceFactory)
-                        .createMediaSource(Uri.parse(stepEntry.getVideoUrl()));
-                // Prepare the player with the source.
-                player.prepare(videoSource);
+                    DataSource.Factory dataSourceFactory = new DefaultDataSourceFactory(requireContext(),
+                            Util.getUserAgent(requireContext(), "BakingApp"), bandwidthMeter);
+                    // This is the MediaSource representing the media to be played.
+                    MediaSource videoSource = new ExtractorMediaSource.Factory(dataSourceFactory)
+                            .createMediaSource(Uri.parse(stepEntry.getVideoUrl()));
+                    // Prepare the player with the source.
+                    player.prepare(videoSource);
 
-                exoPlayer.setPlayer(player);
+                    exoPlayer.setPlayer(player);
+                }
             }
         });
+    }
+
+    public void showVideoOnFullScreen() {
+        LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) exoPlayer.getLayoutParams();
+        params.width=MATCH_PARENT;
+        params.height= MATCH_PARENT;
+        exoPlayer.setLayoutParams(params);
+    }
+
+    public void exitVideoFullScreen() {
+        LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) exoPlayer.getLayoutParams();
+        params.width=MATCH_PARENT;
+        params.height= 0;
+        params.weight = 3;
+        exoPlayer.setLayoutParams(params);
     }
 
     @Override
@@ -92,6 +119,7 @@ public class CookingStepDetailsFragment extends Fragment {
         stepDescriptionView = fragmentView.findViewById(R.id.step_description);
         exoPlayer = fragmentView.findViewById(R.id.step_video);
         stepImage = fragmentView.findViewById(R.id.step_image);
+        portraitParams = (LinearLayout.LayoutParams) exoPlayer.getLayoutParams();
         return fragmentView;
     }
 
@@ -99,5 +127,17 @@ public class CookingStepDetailsFragment extends Fragment {
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         setupViewModel();
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        releasePlayer();
+    }
+
+    private void releasePlayer() {
+        exoPlayer.getPlayer().stop();
+        exoPlayer.getPlayer().release();
+        exoPlayer = null;
     }
 }
