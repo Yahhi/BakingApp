@@ -3,15 +3,22 @@ package ru.develop_for_android.bakingapp.database;
 import android.arch.persistence.room.ColumnInfo;
 import android.arch.persistence.room.Entity;
 import android.arch.persistence.room.ForeignKey;
+import android.arch.persistence.room.Index;
 import android.arch.persistence.room.PrimaryKey;
 
+import static android.arch.persistence.room.ForeignKey.CASCADE;
+
 @Entity(tableName = "ingredient",
+        indices = {@Index("recipe_id")},
         foreignKeys = @ForeignKey(entity = RecipeEntry.class,
                 parentColumns = "id",
-                childColumns = "recipe_id"))
+                childColumns = "recipe_id",
+                onDelete = CASCADE))
 public class IngredientEntry {
+
     @PrimaryKey(autoGenerate = true)
     private int id;
+
     private String name;
     private String measure;
     private double quantity;
@@ -27,6 +34,9 @@ public class IngredientEntry {
 
     public int getId() {
         return id;
+    }
+    public void setId(int id) {
+        this.id = id;
     }
 
     public String getName() {
@@ -53,7 +63,4 @@ public class IngredientEntry {
         this.recipeId = recipeId;
     }
 
-    public void setId(int id) {
-        this.id = id;
-    }
 }

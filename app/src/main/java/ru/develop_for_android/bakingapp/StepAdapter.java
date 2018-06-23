@@ -19,9 +19,11 @@ public class StepAdapter extends RecyclerView.Adapter<StepAdapter.ViewHolder> {
 
     private Context context;
     private List<CookingStepEntry> steps;
+    private CookingStepClickListener listener;
 
-    StepAdapter(Context context) {
+    StepAdapter(Context context, CookingStepClickListener listener) {
         this.context = context;
+        this.listener = listener;
     }
 
     @NonNull
@@ -77,6 +79,13 @@ public class StepAdapter extends RecyclerView.Adapter<StepAdapter.ViewHolder> {
         ViewHolder(View itemView) {
             super(itemView);
             view = itemView;
+            view.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    CookingStepEntry step = steps.get(getAdapterPosition());
+                    listener.onItemClick(step.getId());
+                }
+            });
             stepImage = view.findViewById(R.id.step_image);
             stepNumber = view.findViewById(R.id.step_number);
             stepTitle = view.findViewById(R.id.step_short_description);

@@ -15,7 +15,6 @@ import android.view.ViewGroup;
 
 import java.util.List;
 
-import ru.develop_for_android.bakingapp.database.AppDatabase;
 import ru.develop_for_android.bakingapp.database.CookingStepEntry;
 import ru.develop_for_android.bakingapp.database.IngredientEntry;
 
@@ -30,29 +29,10 @@ public class RecipeDetailFragment extends Fragment {
     private IngredientsAdapter ingredientsAdapter;
 
     public static final String RECIPE_ID_KEY = "recipe_id";
-    private int recipeId;
-
-    public static RecipeDetailFragment newInstance(int recipeId) {
-
-        Bundle args = new Bundle();
-        args.putInt(RECIPE_ID_KEY, recipeId);
-        RecipeDetailFragment fragment = new RecipeDetailFragment();
-        fragment.setArguments(args);
-        return fragment;
-    }
-
-    @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        Bundle args = getArguments();
-        if (args != null && args.containsKey(RECIPE_ID_KEY)) {
-            recipeId = args.getInt(RECIPE_ID_KEY);
-        }
-    }
+    public static final String RECIPE_TITLE_KEY = "title";
 
     public RecipeDetailFragment() {
     }
-
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
@@ -61,7 +41,13 @@ public class RecipeDetailFragment extends Fragment {
 
         RecyclerView stepsList = view.findViewById(R.id.steps_list);
         stepsList.setLayoutManager(new LinearLayoutManager(requireContext()));
-        stepAdapter = new StepAdapter(requireContext());
+        CookingStepClickListener listener;
+        if (requireActivity() instanceof CookingStepClickListener) {
+            listener = (CookingStepClickListener) requireActivity();
+        } else {
+            throw new RuntimeException("parent activity must support CookingStepClickListener");
+        }
+        stepAdapter = new StepAdapter(requireContext(), listener);
         stepsList.setAdapter(stepAdapter);
         DividerItemDecoration decoration = new DividerItemDecoration(requireContext(), VERTICAL);
         stepsList.addItemDecoration(decoration);
@@ -78,9 +64,7 @@ public class RecipeDetailFragment extends Fragment {
     }
 
     private void setupViewModel() {
-        RecipeDetailsViewModelFactory factory = new RecipeDetailsViewModelFactory(
-                AppDatabase.getInstance(requireContext()), recipeId);
-        RecipeDetailsViewModel viewModel = ViewModelProviders.of(this, factory)
+        RecipeDetailsViewModel viewModel = ViewModelProviders.of(requireActivity())
                 .get(RecipeDetailsViewModel.class);
         viewModel.getSteps().observe(this, new Observer<List<CookingStepEntry>>() {
             @Override

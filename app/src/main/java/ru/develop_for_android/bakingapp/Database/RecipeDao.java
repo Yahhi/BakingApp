@@ -2,10 +2,8 @@ package ru.develop_for_android.bakingapp.database;
 
 import android.arch.lifecycle.LiveData;
 import android.arch.persistence.room.Dao;
-import android.arch.persistence.room.Delete;
 import android.arch.persistence.room.Insert;
 import android.arch.persistence.room.Query;
-import android.arch.persistence.room.Transaction;
 
 import java.util.List;
 
@@ -24,8 +22,8 @@ public interface RecipeDao {
     @Insert
     void insertIngredient(IngredientEntry ingredient);
 
-    @Query("SELECT * FROM step WHERE recipe_id = :id")
-    LiveData<List<CookingStepEntry>> loadStepsForRecipe(int id);
+    @Query("SELECT * FROM step WHERE recipe_id = :recipeId ORDER BY order_id ASC")
+    LiveData<List<CookingStepEntry>> loadStepsForRecipe(int recipeId);
 
     @Query("SELECT * FROM step WHERE id = :id")
     LiveData<CookingStepEntry> loadStepById(int id);
@@ -35,11 +33,5 @@ public interface RecipeDao {
 
     @Query("DELETE FROM recipe")
     void clearRecipes();
-
-    @Query("DELETE FROM ingredient")
-    void clearIngredients();
-
-    @Query("DELETE FROM step")
-    void clearCookingSteps();
 
 }

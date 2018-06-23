@@ -1,11 +1,7 @@
 package ru.develop_for_android.bakingapp.networking;
 
-import android.app.Service;
-import android.arch.persistence.room.Dao;
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.os.AsyncTask;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.v4.app.JobIntentService;
@@ -45,8 +41,6 @@ public class RecipesLoader extends JobIntentService {
                 AppExecutors.getInstance().diskIO().execute(new Runnable() {
                     @Override
                     public void run() {
-                        database.recipeDao().clearIngredients();
-                        database.recipeDao().clearCookingSteps();
                         database.recipeDao().clearRecipes();
                     }
                 });

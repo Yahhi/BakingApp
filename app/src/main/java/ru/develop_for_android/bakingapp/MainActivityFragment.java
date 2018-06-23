@@ -50,12 +50,12 @@ public class MainActivityFragment extends Fragment {
             spanCount = 1;
         }
         recyclerView.setLayoutManager(new GridLayoutManager(getContext(), spanCount));
-        adapter = new RecipeAdapter(getContext(), new ItemClickListener() {
+        adapter = new RecipeAdapter(getContext(), new RecipeClickListener() {
             @Override
             public void onItemClick(int itemId, String title) {
                 Intent openDetails = new Intent(requireContext(), RecipeDetailActivity.class);
                 openDetails.putExtra(RecipeDetailFragment.RECIPE_ID_KEY, itemId);
-                openDetails.putExtra(RecipeDetailActivity.RECIPE_TITLE_KEY, title);
+                openDetails.putExtra(RecipeDetailFragment.RECIPE_TITLE_KEY, title);
                 startActivity(openDetails);
             }
         });

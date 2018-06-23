@@ -3,16 +3,22 @@ package ru.develop_for_android.bakingapp.database;
 import android.arch.persistence.room.ColumnInfo;
 import android.arch.persistence.room.Entity;
 import android.arch.persistence.room.ForeignKey;
+import android.arch.persistence.room.Index;
 import android.arch.persistence.room.PrimaryKey;
 
+import static android.arch.persistence.room.ForeignKey.CASCADE;
+
 @Entity(tableName = "step",
+        indices = {@Index("recipe_id")},
         foreignKeys = @ForeignKey(entity = RecipeEntry.class,
                 parentColumns = "id",
-                childColumns = "recipe_id"))
+                childColumns = "recipe_id",
+                onDelete = CASCADE))
 public class CookingStepEntry {
-
     @PrimaryKey(autoGenerate = true)
+    @ColumnInfo(name = "id")
     private int id;
+
     @ColumnInfo(name = "order_id")
     private int orderingId;
     @ColumnInfo(name = "short_description")
@@ -25,18 +31,14 @@ public class CookingStepEntry {
     @ColumnInfo(name = "recipe_id")
     private int recipeId;
 
-    public CookingStepEntry(int id, String shortDescription, String description, String videoUrl,
+    public CookingStepEntry(int orderingId, String shortDescription, String description, String videoUrl,
                             String thumbnailUrl, int recipeId) {
-        this.orderingId = id;
+        this.orderingId = orderingId;
         this.description = description;
         this.shortDescription = shortDescription;
         this.videoUrl = videoUrl;
         this.thumbnailUrl = thumbnailUrl;
         this.recipeId = recipeId;
-    }
-
-    public int getId() {
-        return id;
     }
 
     public String getShortDescription() {
@@ -65,5 +67,13 @@ public class CookingStepEntry {
 
     public void setOrderingId(int orderingId) {
         this.orderingId = orderingId;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
     }
 }

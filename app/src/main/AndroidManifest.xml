@@ -6,6 +6,7 @@
     <uses-permission android:name="android.permission.WAKE_LOCK" />
 
     <application
+        android:name=".MyApp"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
@@ -15,6 +16,7 @@
         <activity
             android:name=".MainActivity"
             android:label="@string/app_name"
+            android:launchMode="singleTop"
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -35,6 +37,15 @@
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="ru.develop_for_android.bakingapp.MainActivity" />
+        </activity>
+        <activity
+            android:name=".CookingStepDetailsActivity"
+            android:label="@string/title_activity_cooking_step_details"
+            android:parentActivityName=".RecipeDetailActivity"
+            android:theme="@style/AppTheme.NoActionBar">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="ru.develop_for_android.bakingapp.RecipeDetailActivity" />
         </activity>
     </application>
 
