@@ -6,7 +6,6 @@
     <uses-permission android:name="android.permission.WAKE_LOCK" />
 
     <application
-        android:name=".MyApp"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
@@ -28,6 +27,8 @@
         <service
             android:name=".networking.RecipesLoader"
             android:permission="android.permission.BIND_JOB_SERVICE" />
+        <service android:name="ru.develop_for_android.bakingapp.widget.WidgetService"
+            android:permission="android.permission.BIND_REMOTEVIEWS"/>
 
         <activity
             android:name=".RecipeDetailActivity"
@@ -40,14 +41,24 @@
         </activity>
         <activity
             android:name=".CookingStepDetailsActivity"
-            android:label="@string/title_activity_cooking_step_details"
             android:configChanges="orientation|screenSize"
+            android:label="@string/title_activity_cooking_step_details"
             android:parentActivityName=".RecipeDetailActivity"
             android:theme="@style/AppTheme.NoActionBar">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="ru.develop_for_android.bakingapp.RecipeDetailActivity" />
         </activity>
+
+        <receiver android:name="ru.develop_for_android.bakingapp.widget.IngredientsListWidget">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/ingredients_list_widget_info" />
+        </receiver>
     </application>
 
 </manifest>

@@ -1,8 +1,6 @@
 package ru.develop_for_android.bakingapp.networking;
 
 import android.content.Intent;
-import android.content.SharedPreferences;
-import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.v4.app.JobIntentService;
 import android.util.Log;
@@ -17,6 +15,8 @@ import com.android.volley.toolbox.Volley;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.util.ArrayList;
 
 import ru.develop_for_android.bakingapp.AppExecutors;
 import ru.develop_for_android.bakingapp.database.AppDatabase;
@@ -46,6 +46,9 @@ public class RecipesLoader extends JobIntentService {
                 });
 
                 Log.i("NETWORK", response.toString());
+                final RecipeEntry[] recipeEntries = new RecipeEntry[response.length()];
+                final ArrayList<IngredientEntry> ingredientEntries = new ArrayList<>();
+                final ArrayList<CookingStepEntry> cookingStepEntries = new ArrayList<>();
                 for (int i = 0; i < response.length(); i++) {
                     try {
                         JSONObject recipeObject = response.getJSONObject(i);
@@ -53,54 +56,40 @@ public class RecipesLoader extends JobIntentService {
                         String name = recipeObject.getString("name");
                         int servings = recipeObject.getInt("servings");
                         String image = recipeObject.getString("image");
-                        final RecipeEntry recipeEntry = new RecipeEntry(id, name, servings, image);
-                        AppExecutors.getInstance().diskIO().execute(new Runnable() {
-                            @Override
-                            public void run() {
-                                database.recipeDao().insertRecipe(recipeEntry);
-                            }
-                        });
+                        recipeEntries[i] = new RecipeEntry(id, name, servings, image);
 
                         JSONArray ingredientsArray = recipeObject.getJSONArray("ingredients");
                         for (int j = 0; j < ingredientsArray.length(); j++) {
                             JSONObject ingredientObject = ingredientsArray.getJSONObject(j);
-                            final IngredientEntry ingredientEntry = new IngredientEntry(recipeEntry.getId(),
+                            ingredientEntries.add(new IngredientEntry(recipeEntries[i].getId(),
                                     ingredientObject.getString("ingredient"),
                                     ingredientObject.getString("measure"),
-                                    ingredientObject.getDouble("quantity"));
-                            AppExecutors.getInstance().diskIO().execute(new Runnable() {
-                                @Override
-                                public void run() {
-                                    database.recipeDao().insertIngredient(ingredientEntry);
-                                }
-                            });
+                                    ingredientObject.getDouble("quantity")));
+
                         }
 
                         JSONArray stepsArray = recipeObject.getJSONArray("steps");
                         for (int j = 0; j < stepsArray.length(); j++) {
                             JSONObject stepObject = stepsArray.getJSONObject(j);
-                            final CookingStepEntry stepEntry = new CookingStepEntry(stepObject.getInt("id"),
+                            cookingStepEntries.add(new CookingStepEntry(stepObject.getInt("id"),
                                     stepObject.getString("shortDescription"),
                                     stepObject.getString("description"),
                                     stepObject.getString("videoURL"),
                                     stepObject.getString("thumbnailURL"),
-                                    recipeEntry.getId());
-                            AppExecutors.getInstance().diskIO().execute(new Runnable() {
-                                @Override
-                                public void run() {
-                                    database.recipeDao().insertStep(stepEntry);
-                                }
-                            });
+                                    recipeEntries[i].getId()));
                         }
 
-                        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
-                        SharedPreferences.Editor editor = preferences.edit();
-                        editor.putBoolean(KEY_DOWNLOAD_COMPLETE, true);
-                        editor.apply();
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
                 }
+                AppExecutors.getInstance().diskIO().execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        database.recipeDao().insertJsonResults(
+                                recipeEntries, ingredientEntries, cookingStepEntries);
+                    }
+                });
             }
         }, new Response.ErrorListener() {
             @Override

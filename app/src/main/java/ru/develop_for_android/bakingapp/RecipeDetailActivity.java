@@ -1,8 +1,12 @@
 package ru.develop_for_android.bakingapp;
 
+import android.appwidget.AppWidgetManager;
 import android.arch.lifecycle.ViewModelProviders;
+import android.content.ComponentName;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -10,8 +14,10 @@ import android.view.View;
 
 import ru.develop_for_android.bakingapp.database.AppDatabase;
 import ru.develop_for_android.bakingapp.database.CookingStepEntry;
+import ru.develop_for_android.bakingapp.widget.IngredientsListWidget;
 
 import static ru.develop_for_android.bakingapp.RecipeDetailFragment.RECIPE_TITLE_KEY;
+import static ru.develop_for_android.bakingapp.widget.IngredientsListWidget.KEY_LAST_SELECTED_RECIPE;
 
 public class RecipeDetailActivity extends AppCompatActivity implements CookingStepClickListener {
 
@@ -28,6 +34,16 @@ public class RecipeDetailActivity extends AppCompatActivity implements CookingSt
         if (incomingData != null) {
             recipeId = incomingData.getIntExtra(RecipeDetailFragment.RECIPE_ID_KEY, 1);
             recipeTitle = incomingData.getStringExtra(RECIPE_TITLE_KEY);
+
+            SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
+            final int oldRecipeId = preferences.getInt(KEY_LAST_SELECTED_RECIPE, 1);
+            if (oldRecipeId != recipeId) {
+                SharedPreferences.Editor editor = preferences.edit();
+                editor.putInt(KEY_LAST_SELECTED_RECIPE, recipeId);
+                editor.apply();
+                notifyWidgets();
+            }
+
             Log.i("LIVE", "there is intent with recipeId " + recipeId);
         }
         if (savedInstanceState != null) {
@@ -49,6 +65,17 @@ public class RecipeDetailActivity extends AppCompatActivity implements CookingSt
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         setTitle(recipeTitle);
         largeScreenDivider = findViewById(R.id.large_screen_divider);
+    }
+
+    private void notifyWidgets() {
+        Intent intent = new Intent(this, IngredientsListWidget.class);
+        intent.setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE);
+// Use an array and EXTRA_APPWIDGET_IDS instead of AppWidgetManager.EXTRA_APPWIDGET_ID,
+// since it seems the onUpdate() is only fired on that:
+        int[] ids = AppWidgetManager.getInstance(getApplication())
+                .getAppWidgetIds(new ComponentName(getApplication(), IngredientsListWidget.class));
+        intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, ids);
+        sendBroadcast(intent);
     }
 
     @Override

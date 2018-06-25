@@ -12,4 +12,7 @@
     <string name="step_forward">Step forward</string>
     <string name="photo_for_this_step">Photo for this step</string>
     <string name="_1">1</string>
+    <string name="appwidget_text">EXAMPLE</string>
+    <string name="add_widget">Add widget</string>
+    <string name="no_recipe_is_selected">No recipe is selected</string>
 </resources>
