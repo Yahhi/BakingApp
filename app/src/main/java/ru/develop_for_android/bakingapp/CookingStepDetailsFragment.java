@@ -16,6 +16,7 @@ import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.google.android.exoplayer2.ExoPlayerFactory;
+import com.google.android.exoplayer2.Player;
 import com.google.android.exoplayer2.SimpleExoPlayer;
 import com.google.android.exoplayer2.source.ExtractorMediaSource;
 import com.google.android.exoplayer2.source.MediaSource;
@@ -37,6 +38,12 @@ import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
  * A placeholder fragment containing a simple view.
  */
 public class CookingStepDetailsFragment extends Fragment {
+
+    private static final String KEY_PLAYER_POSITION = "player_position";
+    private static final String KEY_PLAYING_STATE = "player_state";
+
+    private long oldPoisition;
+    private boolean playingState;
 
     TextView stepDescriptionView;
     PlayerView exoPlayer;
@@ -89,6 +96,8 @@ public class CookingStepDetailsFragment extends Fragment {
                             .createMediaSource(Uri.parse(stepEntry.getVideoUrl()));
                     // Prepare the player with the source.
                     player.prepare(videoSource);
+                    player.seekTo(oldPoisition);
+                    player.setPlayWhenReady(playingState);
 
                     exoPlayer.setPlayer(player);
                 }
@@ -120,6 +129,10 @@ public class CookingStepDetailsFragment extends Fragment {
         exoPlayer = fragmentView.findViewById(R.id.step_video);
         stepImage = fragmentView.findViewById(R.id.step_image);
         portraitParams = (LinearLayout.LayoutParams) exoPlayer.getLayoutParams();
+        if (savedInstanceState != null) {
+            oldPoisition = savedInstanceState.getLong(KEY_PLAYER_POSITION);
+            playingState = savedInstanceState.getBoolean(KEY_PLAYING_STATE);
+        }
         return fragmentView;
     }
 
@@ -130,14 +143,31 @@ public class CookingStepDetailsFragment extends Fragment {
     }
 
     @Override
-    public void onDestroy() {
-        super.onDestroy();
+    public void onDestroyView() {
+        super.onDestroyView();
+        releasePlayer();
+        exoPlayer = null;
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
         releasePlayer();
     }
 
     private void releasePlayer() {
-        exoPlayer.getPlayer().stop();
-        exoPlayer.getPlayer().release();
-        exoPlayer = null;
+        Player player = exoPlayer.getPlayer();
+        if (player != null) {
+            player.stop();
+            player.release();
+            exoPlayer.setPlayer(null);
+        }
+    }
+
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        outState.putLong(KEY_PLAYER_POSITION, exoPlayer.getPlayer().getContentPosition());
+        outState.putBoolean(KEY_PLAYING_STATE, exoPlayer.getPlayer().getPlayWhenReady());
+        super.onSaveInstanceState(outState);
     }
 }
