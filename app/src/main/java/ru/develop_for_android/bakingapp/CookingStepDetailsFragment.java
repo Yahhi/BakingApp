@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -41,9 +42,11 @@ public class CookingStepDetailsFragment extends Fragment {
 
     private static final String KEY_PLAYER_POSITION = "player_position";
     private static final String KEY_PLAYING_STATE = "player_state";
+    private static final String KEY_VIDEO_ADDRESS = "video_address";
 
     private long oldPoisition;
     private boolean playingState;
+    private String videoAddress;
 
     TextView stepDescriptionView;
     PlayerView exoPlayer;
@@ -74,35 +77,42 @@ public class CookingStepDetailsFragment extends Fragment {
                     Glide.with(stepImage).load(imageAddress).into(stepImage);
                 }
 
-                String videoAddress = stepEntry.getVideoUrl();
+                releasePlayer();
+                oldPoisition = 0;
+                playingState = false;
+                videoAddress = stepEntry.getVideoUrl();
                 if (videoAddress == null || videoAddress.equals("")) {
                     exoPlayer.setVisibility(View.GONE);
                 } else {
                     exoPlayer.setVisibility(View.VISIBLE);
-                    //BandwidthMeter bandwidthMeter = new DefaultBandwidthMeter();
-                    DefaultBandwidthMeter bandwidthMeter = new DefaultBandwidthMeter();
-                    TrackSelection.Factory videoTrackSelectionFactory =
-                            new AdaptiveTrackSelection.Factory(bandwidthMeter);
-                    TrackSelector trackSelector =
-                            new DefaultTrackSelector(videoTrackSelectionFactory);
-
-                    SimpleExoPlayer player =
-                            ExoPlayerFactory.newSimpleInstance(getContext(), trackSelector);
-
-                    DataSource.Factory dataSourceFactory = new DefaultDataSourceFactory(requireContext(),
-                            Util.getUserAgent(requireContext(), "BakingApp"), bandwidthMeter);
-                    // This is the MediaSource representing the media to be played.
-                    MediaSource videoSource = new ExtractorMediaSource.Factory(dataSourceFactory)
-                            .createMediaSource(Uri.parse(stepEntry.getVideoUrl()));
-                    // Prepare the player with the source.
-                    player.prepare(videoSource);
-                    player.seekTo(oldPoisition);
-                    player.setPlayWhenReady(playingState);
-
-                    exoPlayer.setPlayer(player);
+                    configurePlayer();
                 }
             }
         });
+    }
+
+    private void configurePlayer() {
+        DefaultBandwidthMeter bandwidthMeter = new DefaultBandwidthMeter();
+        TrackSelection.Factory videoTrackSelectionFactory =
+                new AdaptiveTrackSelection.Factory(bandwidthMeter);
+        TrackSelector trackSelector =
+                new DefaultTrackSelector(videoTrackSelectionFactory);
+
+        SimpleExoPlayer player =
+                ExoPlayerFactory.newSimpleInstance(getContext(), trackSelector);
+
+        DataSource.Factory dataSourceFactory = new DefaultDataSourceFactory(requireContext(),
+                Util.getUserAgent(requireContext(), "BakingApp"), bandwidthMeter);
+        // This is the MediaSource representing the media to be played.
+        MediaSource videoSource = new ExtractorMediaSource.Factory(dataSourceFactory)
+                .createMediaSource(Uri.parse(videoAddress));
+        // Prepare the player with the source.
+        player.prepare(videoSource);
+        player.seekTo(oldPoisition);
+        player.setPlayWhenReady(playingState);
+        Log.i("PLAYER", "configuring player");
+
+        exoPlayer.setPlayer(player);
     }
 
     public void showVideoOnFullScreen() {
@@ -129,9 +139,10 @@ public class CookingStepDetailsFragment extends Fragment {
         exoPlayer = fragmentView.findViewById(R.id.step_video);
         stepImage = fragmentView.findViewById(R.id.step_image);
         portraitParams = (LinearLayout.LayoutParams) exoPlayer.getLayoutParams();
-        if (savedInstanceState != null) {
-            oldPoisition = savedInstanceState.getLong(KEY_PLAYER_POSITION);
-            playingState = savedInstanceState.getBoolean(KEY_PLAYING_STATE);
+        if (savedInstanceState != null && savedInstanceState.containsKey(KEY_VIDEO_ADDRESS)) {
+            oldPoisition = savedInstanceState.getLong(KEY_PLAYER_POSITION, 0);
+            playingState = savedInstanceState.getBoolean(KEY_PLAYING_STATE, false);
+            videoAddress = savedInstanceState.getString(KEY_VIDEO_ADDRESS);
         }
         return fragmentView;
     }
@@ -150,8 +161,18 @@ public class CookingStepDetailsFragment extends Fragment {
     }
 
     @Override
+    public void onResume() {
+        super.onResume();
+        if (videoAddress != null) {
+            configurePlayer();
+        }
+    }
+
+    @Override
     public void onPause() {
         super.onPause();
+        oldPoisition = exoPlayer.getPlayer().getContentPosition();
+        playingState = exoPlayer.getPlayer().getPlayWhenReady();
         releasePlayer();
     }
 
@@ -166,8 +187,11 @@ public class CookingStepDetailsFragment extends Fragment {
 
     @Override
     public void onSaveInstanceState(@NonNull Bundle outState) {
-        outState.putLong(KEY_PLAYER_POSITION, exoPlayer.getPlayer().getContentPosition());
-        outState.putBoolean(KEY_PLAYING_STATE, exoPlayer.getPlayer().getPlayWhenReady());
+        if (videoAddress != null) {
+            outState.putLong(KEY_PLAYER_POSITION, oldPoisition);
+            outState.putBoolean(KEY_PLAYING_STATE, playingState);
+            outState.putString(KEY_VIDEO_ADDRESS, videoAddress);
+        }
         super.onSaveInstanceState(outState);
     }
 }
